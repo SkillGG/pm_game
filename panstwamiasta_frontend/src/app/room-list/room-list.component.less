@@ -1,0 +1,56 @@
+:host {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  height: 100vh;
+  --animlen: 0.45s;
+}
+
+h2 {
+  text-align: center;
+}
+
+#room-list {
+  display: grid;
+  grid-auto-flow: row;
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid black;
+  margin-inline: auto;
+  width: 75%;
+  .room {
+    display: grid;
+    grid-template-columns: 1fr min-content min-content;
+    grid-auto-flow: column;
+    cursor: pointer;
+    &:hover,
+    &:focus {
+      .room-name {
+        &::after {
+          content: "Join";
+          margin-left: 15px;
+          color: blue;
+        }
+      }
+    }
+    .room-name {
+      text-align: center;
+    }
+    .room-spectate {
+      border: none;
+      color: black;
+      background-color: transparent;
+    }
+    &:nth-child(2n + 1) {
+      background-color: darkgray;
+    }
+    &:hover {
+      background-color: lightgray;
+    }
+    > div {
+      padding: 5px;
+    }
+  }
+}

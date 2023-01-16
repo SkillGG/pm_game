@@ -1,0 +1,27 @@
+{
+  "tasks": [
+    {
+      "label": "ClosePrevTerminalsonStartup",
+      "command": "${command:workbench.action.terminal.killAll}",
+      "type": "shell",
+      "problemMatcher": []
+    },
+    {
+      "dependsOn": ["ClosePrevTerminalsonStartup"],
+      "label": "CreateTerminalonStartup",
+      "command": "${command:workbench.action.terminal.new}",
+      "type": "shell",
+      "problemMatcher": []
+    },
+    {
+      "label": "SplitTerminalonStartup",
+      "dependsOn": ["CreateTerminalonStartup"],
+      "command": "${command:workbench.action.terminal.split}",
+      "type": "shell",
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
+}

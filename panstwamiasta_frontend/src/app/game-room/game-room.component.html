@@ -1,0 +1,73 @@
+<div>
+  Connected to room {{ this.roomdata?.id }}
+  <button (click)="this.disconnect()">disconnect</button>
+</div>
+<h2>Player List:</h2>
+<ul>
+  <li
+    [class]="(player == this.roomdata?.host && 'hostname') || ''"
+    *ngFor="let player of this.roomdata?.connected"
+  >
+    {{ player }}
+  </li>
+</ul>
+<button *ngIf="this.roomdata?.host == this.playerid" (click)="this.sendStart()">
+  Start Game
+</button>
+<p *ngIf="this.getTimeUntil() > 0">
+  Time until answers are locked:
+  {{ this.getTimeUntil() }}
+</p>
+<table id="gametable">
+  <thead>
+    <tr>
+      <th>Round.</th>
+      <ng-container *ngFor="let category of this.roomdata?.gamemode?.categories"
+        ><th *ngIf="category && category.name">
+          {{ category.name }}
+        </th>
+      </ng-container>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td></td>
+      <ng-container
+        *ngFor="let category of this.roomdata?.gamemode?.categories"
+      >
+        <td *ngIf="category && category.name">
+          <input
+            type="text"
+            [ngModel]="this.answers.get(category.id) || ''"
+            (ngModelChange)="this.answers.set(category.id, $event)"
+          />
+        </td>
+      </ng-container>
+      <td>
+        <button (click)="submitAnswers()">Send</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div>
+  <h3>Chat</h3>
+  <table id="chat">
+    <thead>
+      <tr>
+        <th>From</th>
+        <th>Message</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let msg of this.roomMessages">
+        <td>{{ msg.from == this.playerid ? "You" : msg.from }}</td>
+        <td>{{ msg.message }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <input type="text" [(ngModel)]="message" /><input
+    (click)="sendMessage(message)"
+    type="button"
+    value="Send"
+  />
+</div>

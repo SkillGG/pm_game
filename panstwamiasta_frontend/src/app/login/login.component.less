@@ -1,0 +1,80 @@
+:host {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  height: 100vh;
+  --animlen: 0.45s;
+}
+
+.login-btn {
+  background-color: black;
+  color: white;
+  border: none;
+  font-size: 2rem;
+  padding: 1rem 3rem;
+  border-radius: 10px;
+}
+
+.login-btn:active {
+  translate: 0 2px;
+}
+
+.login-btn:hover {
+  translate: 0 -2px;
+}
+
+.hiding {
+  animation: hide var(--animlen) ease-in-out forwards;
+}
+
+.showing {
+  animation: show var(--animlen) ease-in-out forwards;
+}
+
+@keyframes show {
+  0% {
+    scale: 0%;
+    rotate: -360deg;
+  }
+  100% {
+    scale: 100%;
+    rotate: 0deg;
+  }
+}
+
+@keyframes hide {
+  0% {
+    scale: 100%;
+  }
+  100% {
+    scale: 0%;
+  }
+}
+
+.hid {
+  display: none;
+}
+
+#login-box input {
+  margin: 0;
+  border: none;
+  padding: 10px;
+  font-size: 1.5em;
+  --br: 10px;
+}
+
+#login-box input[type="text"] {
+  border-radius: var(--br) 0 0 var(--br);
+}
+
+#login-box input[type="button"] {
+  border-radius: 0 var(--br) var(--br) 0;
+}
+
+#login-box input:focus {
+  outline: none;
+}
+
+.outlined {
+  outline: auto;
+}

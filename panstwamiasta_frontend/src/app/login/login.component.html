@@ -1,0 +1,16 @@
+<div>
+  <button
+    class="login-btn"
+    #startbtn
+    (click)="this.animationStart(startbtn, loginbox, username)"
+  >
+    Play
+  </button>
+  <div id="login-box" #loginbox class="hid">
+    <input type="text" #username class="login-input" /><input
+      type="button"
+      value="Login"
+      (click)="login(username.value)"
+    />
+  </div>
+</div>

@@ -1,0 +1,82 @@
+:host {
+  margin: 0;
+  padding: 0;
+}
+body {
+  height: 100vh;
+  --animlen: 0.45s;
+}
+nav#login-bar {
+  float: right;
+  margin: 5px;
+  border-radius: 10px;
+  background-color: lightgray;
+  padding: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+nav#login-bar:hover,
+nav#login-bar:focus {
+  background-color: darkgray;
+}
+nav#login-bar:hover #login-menu,
+nav#login-bar:focus #login-menu {
+  display: block;
+}
+nav#login-bar #login-menu {
+  display: none;
+  background-color: darkgray;
+  position: relative;
+  top: 100%;
+}
+nav#login-bar #login-menu .menu-option {
+  padding: 5px;
+  width: min-content;
+  border-radius: 10px;
+  margin: 10px auto 0px auto;
+}
+nav#login-bar #login-menu .menu-option:hover,
+nav#login-bar #login-menu .menu-option:focus {
+  background-color: gray;
+}
+h2 {
+  text-align: center;
+}
+#room-list {
+  display: grid;
+  grid-auto-flow: row;
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid black;
+  margin-inline: auto;
+  width: 75%;
+}
+#room-list .room {
+  display: grid;
+  grid-template-columns: 1fr min-content min-content;
+  grid-auto-flow: column;
+  cursor: pointer;
+}
+#room-list .room:hover .room-name::after,
+#room-list .room:focus .room-name::after {
+  content: "Join";
+  margin-left: 15px;
+  color: blue;
+}
+#room-list .room .room-name {
+  text-align: center;
+}
+#room-list .room .room-spectate {
+  border: none;
+  color: black;
+  background-color: transparent;
+}
+#room-list .room:nth-child(2n + 1) {
+  background-color: darkgray;
+}
+#room-list .room:hover {
+  background-color: lightgray;
+}
+#room-list .room > div {
+  padding: 5px;
+}

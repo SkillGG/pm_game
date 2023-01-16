@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LoginSite</title>
+    <link rel="stylesheet" href="./main.css" />
+    <link rel="stylesheet" href="./login.css" />
+  </head>
+  <body>
+    <style id="styles"></style>
+    <div>
+      <button class="login-btn">Play</button>
+      <div id="login-box" class="hid">
+        <input type="text" class="login-input" /><input
+          type="button"
+          value="Login"
+        />
+      </div>
+    </div>
+    <script>
+      const animlen = 0.45;
+      const styles = document.querySelector("#styles");
+      if (styles) styles.innerHTML = `:root{--animlen:${animlen}s;}`;
+      const pbtn = document.querySelector("button");
+      const logbox = document.querySelector("#login-box");
+      const inp = document.querySelector("input[type='text']");
+      const lbtn = document.querySelector("input[type='button']");
+      pbtn.onclick = (e) => {
+        pbtn.classList.add("hiding");
+        setTimeout(() => {
+          pbtn.classList.add("hid");
+          pbtn.classList.remove("hiding");
+          logbox.classList.remove("hid");
+          logbox.classList.add("showing");
+          setTimeout(() => {
+            logbox.classList.remove("showing");
+            inp.onfocus = () => {
+              logbox.classList.add("outlined");
+            };
+            inp.onblur = () => logbox.classList.remove("outlined");
+          }, animlen * 1000);
+        }, animlen * 1000);
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+<app-login
+  #loginPage
+  (loggingIn)="login($event)"
+  *ngIf="page === 0"
+></app-login>
+<app-hub
+  #hubPage
+  [name]="username ? username : ''"
+  *ngIf="page === 1"
+  (logOut)="logout()"
+></app-hub>

@@ -1,0 +1,12 @@
+<h2>Select a room</h2>
+<div id="room-list">
+  <div *ngFor="let room of this.rooms" tabindex="3" class="room">
+    <div class="room-name" (click)="this.connectTo(room.id)">
+      Room #{{ room.id }}
+    </div>
+    <div class="room-players">
+      {{ room.connected.length }}/{{ room.maxNumberOfPlayers }}
+    </div>
+    <button disabled="true" class="room-spectate">Spectate</button>
+  </div>
+</div>

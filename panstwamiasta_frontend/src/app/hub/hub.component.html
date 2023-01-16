@@ -1,0 +1,21 @@
+<nav id="login-bar">
+  <span>{{ this.name }}</span>
+  <div id="login-menu">
+    <p class="menu-option" (click)="this.logout()">Logout</p>
+  </div>
+</nav>
+<app-room-list
+  *ngIf="!this.currentRoom && this.loaded && this.rooms"
+  [rooms]="this.rooms"
+  (connectOut)="this.connectTo($event)"
+  (refreshOut)="this.refreshRoomList()"
+></app-room-list>
+<div *ngIf="this.error && !this.rooms">
+  <p [innerHTML]="this.error"></p>
+</div>
+<app-game-room
+  *ngIf="this.currentRoom"
+  [playerid]="this.name"
+  [roomdata]="this.currentRoom"
+  (disconnectFrom)="this.disconnectFrom()"
+></app-game-room>
