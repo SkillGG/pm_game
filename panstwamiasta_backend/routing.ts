@@ -55,13 +55,7 @@ export class Routing {
   @Route("post")
   $room$_roomid_$start(req: FRequest<{ roomid: string }>, res: FResponse) {
     this.useRoomEmitterRoute<sendGameStartToRoom>(req, res, (room, data) => {
-      const { playerid } = data;
-      if (!playerid) return;
-      room.emitEvent({
-        playerSending: playerid,
-        payload: "start",
-        type: "gamestart",
-      } as StartEvent);
+      if (data.playerid == room.host) room.startGame();
     });
   }
 

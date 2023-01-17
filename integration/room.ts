@@ -31,7 +31,7 @@ export class Room {
     this.emitEvent({
       type: "gamestart",
       playerSending: this.host,
-      payload: new Date(endTime).toString(),
+      payload: new Date(endTime).getTime(),
     } as StartEvent);
   }
   emitEvent(data: RoomEventData) {

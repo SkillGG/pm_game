@@ -37,7 +37,7 @@ export interface ChatEvent extends EventData {
 
 export interface StartEvent extends EventData {
   type: EventType.START;
-  payload: string;
+  payload: number;
 }
 
 export interface HostChangeEvent extends EventData {

@@ -13,6 +13,10 @@ import { RoomEventData } from '../../../../integration/roomevents';
 
 type AnswersMap = Map<number, string>;
 
+const epochMS = (m: number) => {
+  return { min: Math.floor(m / 1000 / 60), sec: Math.floor((m / 1000) % 60) };
+};
+
 @Component({
   selector: 'app-game-room',
   templateUrl: './game-room.component.html',
@@ -33,7 +37,8 @@ export class GameRoomComponent {
   getTimeUntil() {
     if (!this.answerLockTime) return -1;
     else {
-      return new Date(this.answerLockTime - new Date().getTime()).getMinutes();
+      const { min, sec } = epochMS(this.answerLockTime - new Date().getTime());
+      return `${min}:${sec}`;
     }
   }
   playerLeft(playerid: string) {
@@ -83,9 +88,10 @@ export class GameRoomComponent {
       return;
     this.roomtimer = setInterval(() => {
       const now = new Date().getTime();
-      if (now - this.answerLockTime < 0) {
+      if (this.answerLockTime - now < 0) {
         if (this.roomtimer) clearInterval(this.roomtimer);
       }
+      this.cd.detectChanges();
     }, 1000);
   }
   ngOnInit() {
@@ -126,7 +132,11 @@ export class GameRoomComponent {
               break;
             case 'gamestart':
               if (this.roomdata.host == event.playerSending) {
+                console.log(event.payload);
                 this.answerLockTime = new Date(event.payload).getTime();
+                console.log(
+                  epochMS(this.answerLockTime - new Date().getTime())
+                );
                 this.startGameTimer();
               }
               break;

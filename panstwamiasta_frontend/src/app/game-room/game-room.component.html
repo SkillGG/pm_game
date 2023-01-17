@@ -14,7 +14,7 @@
 <button *ngIf="this.roomdata?.host == this.playerid" (click)="this.sendStart()">
   Start Game
 </button>
-<p *ngIf="this.getTimeUntil() > 0">
+<p *ngIf="this.getTimeUntil() != -1">
   Time until answers are locked:
   {{ this.getTimeUntil() }}
 </p>
