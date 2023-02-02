@@ -1,0 +1,13 @@
+<div>
+  <p *ngIf="this.type=='drawletter'">
+    <app-letter-shuffler [timerStartListener]="this.timerListener" />
+  </p>
+
+  <p *ngIf="this.type == 'haste'">
+    Somebody already answered! Remaining time: {{ this.time }}
+  </p>
+
+  <p *ngIf="this.type == 'primary'">
+    Time until answers are locked: {{ this.time }}
+  </p>
+</div>

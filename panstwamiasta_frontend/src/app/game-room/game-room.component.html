@@ -11,17 +11,22 @@
     {{ player }}
   </li>
 </ul>
-<button *ngIf="this.roomdata?.host == this.playerid" (click)="this.sendStart()">
+<button
+  *ngIf="this.roomdata?.host == this.playerid && this.roomdata?.state == 0"
+  (click)="this.sendStart()"
+>
   Start Game
 </button>
-<p *ngIf="this.getTimeUntil() != -1">
-  Time until answers are locked:
-  {{ this.getTimeUntil() }}
-</p>
+
+<h2 *ngIf="this.roomdata?.gameSpecificData?.startingLetter">
+  The letter is: {{ this.roomdata?.gameSpecificData?.startingLetter }}
+</h2>
+
+<app-game-timer [tick]="this.timerTick" [time]="this.htmlTimer?.time||''" [type]="this.htmlTimer?.type" />
+
 <table id="gametable">
   <thead>
     <tr>
-      <th>Round.</th>
       <ng-container *ngFor="let category of this.roomdata?.gamemode?.categories"
         ><th *ngIf="category && category.name">
           {{ category.name }}
@@ -31,12 +36,12 @@
   </thead>
   <tbody>
     <tr>
-      <td></td>
       <ng-container
         *ngFor="let category of this.roomdata?.gamemode?.categories"
       >
         <td *ngIf="category && category.name">
           <input
+            [disabled]="!!this?.roomdata?.locked"
             type="text"
             [ngModel]="this.answers.get(category.id) || ''"
             (ngModelChange)="this.answers.set(category.id, $event)"
@@ -65,8 +70,8 @@
       </tr>
     </tbody>
   </table>
-  <input type="text" [(ngModel)]="message" /><input
-    (click)="sendMessage(message)"
+  <input type="text" [(ngModel)]="message" #chatInput /><input
+    (click)="sendMessage(message, chatInput)"
     type="button"
     value="Send"
   />

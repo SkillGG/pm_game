@@ -6,6 +6,8 @@ import {
   sendGameStartToRoom,
   sendRoomDisconnect,
   sendChatWithRoom,
+  sendHasteToRoom,
+  sendGatherToRoom,
 } from '../../../integration/routebacks';
 import { ServerError, ServerResponse } from './../../../integration/roomlist';
 
@@ -83,9 +85,23 @@ const chatWithRoom = async (roomid: number, playerid: string, msg: string) => {
 
 const sendAnswersToServer = async (
   roomid: number,
+  playerid: string,
   answers: Map<number, string>
 ) => {
-  console.log();
+  console.log('Sending answers');
+  const answersArray = [...answers];
+  const result = await fetchFromServer(`/room/${roomid}/data`, {
+    method: 'POST',
+    body: JSON.stringify({ playerid, data: answersArray } as sendGatherToRoom),
+  });
+};
+
+const sendHasteSignalToServer = async (roomid: number, playerid: string) => {
+  console.log('Haste');
+  const result = await fetchFromServer(`/room/${roomid}/haste`, {
+    method: 'POST',
+    body: JSON.stringify({ playerid } as sendHasteToRoom),
+  });
 };
 
 const sendGameStartSignal = async (roomid: number, playerid: string) => {
@@ -108,6 +124,7 @@ const Server = {
   connectToRoom,
   chatWithRoom,
   sendAnswersToServer,
+  sendHasteSignalToServer,
   sendGameStartSignal,
 };
 

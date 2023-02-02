@@ -2,8 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import Server from 'src/server_integration/server';
 import { parseLocation } from 'src/utils';
 import { ServerError } from 'src/../../integration/roomlist';
-import { ActivatedRoute } from '@angular/router';
-import { Room, RoomJSONData } from '../../../../integration/room';
+import { RoomJSONData } from '../../../../integration/utils';
 
 @Component({
   selector: 'app-hub',
@@ -63,6 +62,7 @@ export class HubComponent {
     if (room) {
       window.history.pushState('', '', `?room=${id}`);
       this.currentRoom = room;
+      console.log('Entering room', room);
     } else {
       console.error("This room doesn't exist!");
     }
