@@ -25,6 +25,12 @@ type HTMLTimerData = {
   type: TimerType;
 };
 
+enum GameClientState {
+  WAIT = 'wait',
+  PLAY = 'play',
+  SCOREBOARD = 'scores',
+}
+
 @Component({
   selector: 'app-game-room',
   templateUrl: './game-room.component.html',
@@ -43,6 +49,7 @@ export class GameRoomComponent {
   htmlTimer: HTMLTimerData | null = null;
   randomizedLetter: string = '';
   timerTick: number = 0;
+  gameState: GameClientState = GameClientState.WAIT;
   constructor(private cd: ChangeDetectorRef) {}
   getTimeUntilTimerEnd() {
     if (!this.roomdata?.timerState) return -1;
@@ -138,6 +145,7 @@ export class GameRoomComponent {
       console.log('No timer to stop!');
     }
   }
+  showResults() {}
   ngOnInit() {
     if (!this.roomdata || !this.playerid) return;
     if (!this.eventSource) {
@@ -199,6 +207,13 @@ export class GameRoomComponent {
                   break;
                 case UpdateDataType.ROUND_END:
                   this.roomdata.gameSpecificData = {};
+                  this.roomdata.playersPoints = new Map(
+                    event.payload.endRoundData.points
+                  );
+                  this.roomdata.playersAnswers = new Map(
+                    event.payload.endRoundData.answers
+                  );
+                  this.showResults();
                   break;
               }
               break;

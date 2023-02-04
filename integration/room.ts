@@ -90,12 +90,6 @@ export class Room {
                             repeats
                         )
                     ];
-                console.log(
-                    "setting",
-                    pointsForAnswer,
-                    "for everyone that answered",
-                    answer
-                );
                 this.setPointsForEveryPlayerWhoAnswered(
                     catId,
                     answer,
@@ -103,7 +97,6 @@ export class Room {
                 );
             });
         }
-        varDump(this.playersPoints);
     }
     setPlayerData(id: string, answers: AnswersArray) {
         console.log("Setting player data", id, answers);
@@ -129,7 +122,10 @@ export class Room {
             playerSending: "server",
             payload: {
                 type: UpdateDataType.ROUND_END,
-                endRoundData: {},
+                endRoundData: {
+                    points: [...this.playersPoints],
+                    answers: [...this.playersAnswers]
+                },
             } as RoundEndUpdate,
         } as UpdateEvent);
     }

@@ -23,7 +23,8 @@
 </h2>
 
 <app-game-timer [tick]="this.timerTick" [time]="this.htmlTimer?.time||''" [type]="this.htmlTimer?.type" />
-
+<!-- TODO: move gametable to another component -->
+<!-- TODO: add scoreboard as a new component shown if gmaeState is set to 'score' -->
 <table id="gametable">
   <thead>
     <tr>

@@ -1,4 +1,4 @@
-import { AnswersArray } from "./utils";
+import { AnswersArray, PlayerPointsForCategory } from "./utils";
 
 export enum EventType {
     CHAT = "chatmessage",
@@ -94,8 +94,8 @@ export type LetterDrawnUpdate = {
 export type RoundEndUpdate = {
     type: UpdateDataType.ROUND_END;
     endRoundData: {
-        answers: AnswersArray[];
-        points: [string, number, number][];
+        answers: [string,AnswersArray][];
+        points: [string, PlayerPointsForCategory[]][];
     };
 };
 
