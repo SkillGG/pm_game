@@ -1,0 +1,12 @@
+{
+    "lastEditID": 0,
+    "words": [
+        { "id": -5, "word": "", "status": "dropped" },
+        {
+            "id": -4,
+            "word": "",
+            "status": "skipped"
+        },
+        { "id": -3, "word": "", "status": "finished", "categories": [0] }
+    ]
+}

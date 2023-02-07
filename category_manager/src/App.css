@@ -1,0 +1,126 @@
+body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 10fr 3fr;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+}
+
+#history {
+    grid-column: 1 / span 2;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+#wikicontent {
+    border: 1px solid black;
+    margin: 25px;
+    border-radius: 25px;
+    overflow-y: scroll;
+    padding: 25px;
+    max-height: 75%;
+}
+
+#picker {
+    padding: 25px;
+}
+
+#picker form {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+#wiki {
+    padding: 5px;
+    overflow-y: scroll;
+}
+
+#wiki .switchview {
+    float: right;
+    margin-right: 5px;
+}
+#wiki .switchview:nth-child(1) {
+    margin-right: 50px;
+}
+
+#picker .category-switch {
+    border: 1px solid black;
+    border-radius: 5px;
+    margin: 5px 25px;
+    padding: 5px;
+    text-align: center;
+    user-select: none;
+    display: block;
+}
+
+#picker .category-switch.switch-on {
+    background-color: lightgray;
+}
+
+#picker .category-switch.switch-on::before {
+    content: "";
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    display: block;
+    background-color: green;
+}
+
+#picker .category-switch.switch-off {
+    background-color: gray;
+}
+
+#picker .category-switch.switch-off::before {
+    content: "";
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    display: block;
+    background-color: red;
+}
+
+.historyRecord {
+    display: grid;
+    grid-template-columns: 1fr 20fr 10fr;
+}
+
+.historyRecord:nth-child(2n) {
+    background-color: lightgray;
+}
+
+.historyRecord:hover {
+    background-color: darkgray;
+}
+.historyWordID::before {
+    content: "#";
+}
+
+.historyWordCategory {
+    color: black;
+    margin-inline: 5px;
+}
+
+.historyWordCategories {
+    color: black;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.historyWordName {
+    text-align: center;
+    font-weight: bolder;
+}
+
+.historyWordID {
+    color: black;
+}

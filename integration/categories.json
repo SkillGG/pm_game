@@ -1,0 +1,69 @@
+[
+    {
+        "name": "Country",
+        "id": 1,
+        "keywords": ["country"]
+    },
+    { "name": "City", "id": 2, "keywords": ["town", "city"] },
+    { "name": "Name", "id": 3, "keywords": ["given name", "surname"] },
+    {
+        "name": "Plant",
+        "id": 4,
+        "keywords": [
+            "shrub",
+            "bush",
+            "plant",
+            "leaf",
+            "flower",
+            "grass",
+            "herb",
+            "weed",
+            "tree",
+            "vine",
+            "sprout",
+            "greenery"
+        ]
+    },
+    {
+        "name": "Animal",
+        "id": 5,
+        "keywords": [
+            "animal",
+            "beast",
+            "creature",
+            "critter",
+            "invertebrate",
+            "vertebrate",
+            "fish",
+            "mammal"
+        ]
+    },
+    { "name": "Thing", "id": 6 },
+    { "name": "Noun", "id": 7, "keywords": ["noun"] },
+    { "name": "Verb", "id": 8, "keywords": ["verb"] },
+    { "name": "Adverb", "id": 9, "keywords": ["adverb"] },
+    { "name": "Adjective", "id": 10, "keywords": ["adjective"] },
+    { "name": "River", "id": 11, "keywords": ["river"] },
+    {
+        "name": "Food",
+        "id": 12,
+        "keywords": [
+            "food",
+            "meal",
+            "bread",
+            "cooking",
+            "drink",
+            "feed",
+            "meat",
+            "snack",
+            "aliment"
+        ]
+    },
+    { "name": "Song Title", "id": 13 },
+    { "name": "Movie Title", "id": 14 },
+    {
+        "name": "Occupation",
+        "id": 15,
+        "keywords": ["one who"]
+    }
+]
