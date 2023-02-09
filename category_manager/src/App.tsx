@@ -8,7 +8,7 @@ import cats from "./../../integration/categories.json";
 import wtxt from "./../../integration/txt_words.json";
 import en_data from "./../../integration/EN_data.json";
 
-type WordStatus = "skipped" | "dropped" | "finished";
+export type WordStatus = "skipped" | "dropped" | "finished";
 
 export type WordType = {
     id: number;
@@ -193,30 +193,49 @@ function App() {
 
     useEffect(() => {
         if (word) {
-            const previousCategories = getFromHistory(word);
+            const wordInDatabase = getFromHistory(word);
             // console.log(previousCategories);
-            setEditMode(!!previousCategories);
-            if (previousCategories && previousCategories.categoryNumbers) {
-                setChosenCats(previousCategories.categoryNumbers);
-                setCategoryReasons(
-                    previousCategories.categoryNumbers.map((cat) => {
-                        return [cat, "Editing"];
-                    })
-                );
+            setEditMode(!!wordInDatabase);
+            if (!wordInDatabase) return;
+            setCategoryReasons((p) => {
+                const reason: [number, string] = [-1, wordInDatabase.status];
+                return p ? [...p, reason] : [reason];
+            });
+            if (wordInDatabase.categoryNumbers) {
+                setChosenCats(wordInDatabase.categoryNumbers);
+                setCategoryReasons((p) => {
+                    if (wordInDatabase.categoryNumbers) {
+                        const reasons: [number, string][] =
+                            wordInDatabase.categoryNumbers.map((cat) => {
+                                return [cat, "Editing"];
+                            });
+                        return p ? [...p, ...reasons] : [...reasons];
+                    } else return p;
+                });
             }
         }
     }, [word]);
 
-    const getFromHistory = (s: string) => {
+    const getFromHistory = (
+        s: string
+    ): {
+        status: WordStatus;
+        id: number;
+        categoryNumbers?: number[];
+    } | null => {
         const foundWord = ENData.words.find((c) => c.word == s);
         const cats = foundWord?.categories;
-        // console.log(!foundWord && !cats);
         if (!foundWord) return null;
-        else if (foundWord && !cats) return { id: foundWord.id };
+        else if (foundWord && !cats)
+            return {
+                status: foundWord.status,
+                id: foundWord.id,
+            };
         else
             return {
                 categoryNumbers: cats,
                 id: foundWord.id,
+                status: foundWord.status,
             };
     };
 

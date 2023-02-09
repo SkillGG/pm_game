@@ -1,4 +1,5 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
+import { WordStatus } from "../App";
 
 interface WikiPageProps {
     word: string;
@@ -6,7 +7,7 @@ interface WikiPageProps {
     categories: { name: string; id: number; keywords?: string[] }[];
     getFromHistory(
         name: string
-    ): { categoryNumbers?: number[]; id: number } | null;
+    ): { categoryNumbers?: number[]; id: number; status: WordStatus } | null;
     setNetworkError(e: string | null): void;
     setCategoryReasons: React.Dispatch<
         React.SetStateAction<[number, string][] | null>

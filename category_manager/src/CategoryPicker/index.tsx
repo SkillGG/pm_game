@@ -87,16 +87,23 @@ const CategoryPicker: FunctionComponent<CategoryPickerProps> = ({
                             const categoryName = categories.find(
                                 (cid) => cid.id === reason[0]
                             )?.name;
-                            if (categoryName)
-                                return (
-                                    <tr
-                                        key={`${reason[0]}_${reason[1]}`}
-                                        className="cat-reason"
-                                    >
-                                        <td>{categoryName}:</td>
-                                        <td> {reason[1]}</td>
-                                    </tr>
-                                );
+                            return (
+                                <tr
+                                    key={`${reason[0]}_${reason[1]}`}
+                                    className="cat-reason"
+                                >
+                                    {categoryName ? (
+                                        <>
+                                            <td>{categoryName}</td>
+                                            <td> {reason[1]}</td>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <td colSpan={2}>{reason[1]}</td>
+                                        </>
+                                    )}
+                                </tr>
+                            );
                         })}
                     </tbody>
                 </table>
