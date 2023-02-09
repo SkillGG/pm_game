@@ -6,7 +6,7 @@ interface WikiPageProps {
     categories: { name: string; id: number; keywords?: string[] }[];
     getFromHistory(
         name: string
-    ): { categoryNumbers: number[]; id: number } | null;
+    ): { categoryNumbers?: number[]; id: number } | null;
     setNetworkError(e: string | null): void;
     setCategoryReasons: React.Dispatch<
         React.SetStateAction<[number, string][] | null>
@@ -157,7 +157,11 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
         if (findOf) {
             setShowPrevious((p) => () => {
                 const data = getFromHistory(findOf[1].trim());
-                if (data && data.categoryNumbers.length > 0) {
+                if (
+                    data &&
+                    data.categoryNumbers &&
+                    data.categoryNumbers.length > 0
+                ) {
                     data.categoryNumbers.forEach((c) => {
                         setCategory(c);
                         addReason(c, `From ${findOf[1].trim()}`);

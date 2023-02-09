@@ -122,9 +122,10 @@ function App() {
         }
         setNewWord(false);
         setChosenCats([]);
-        console.log(ENData.lastFileWordIndex, "current wordIndex");
-        if (!newWord) ENData.lastFileWordIndex++;
-        console.log(ENData.lastFileWordIndex, "next wordIndex");
+        const index = Words.findIndex(
+            (w) => !ENData.words.find((end) => end.word === w)
+        );
+        ENData.lastFileWordIndex = index;
         saveToFile();
         setWord(Words[ENData.lastFileWordIndex]);
     };
@@ -158,6 +159,7 @@ function App() {
         } else {
             console.error("User canceled");
         }
+        setBackTrack(0);
     };
 
     const reject = () => {
@@ -192,8 +194,9 @@ function App() {
     useEffect(() => {
         if (word) {
             const previousCategories = getFromHistory(word);
+            // console.log(previousCategories);
             setEditMode(!!previousCategories);
-            if (previousCategories) {
+            if (previousCategories && previousCategories.categoryNumbers) {
                 setChosenCats(previousCategories.categoryNumbers);
                 setCategoryReasons(
                     previousCategories.categoryNumbers.map((cat) => {
@@ -205,13 +208,15 @@ function App() {
     }, [word]);
 
     const getFromHistory = (s: string) => {
-        const word = ENData.words.find((c) => c.word == s);
-        const cats = word?.categories;
-        if (!word || !cats) return null;
+        const foundWord = ENData.words.find((c) => c.word == s);
+        const cats = foundWord?.categories;
+        // console.log(!foundWord && !cats);
+        if (!foundWord) return null;
+        else if (foundWord && !cats) return { id: foundWord.id };
         else
             return {
                 categoryNumbers: cats,
-                id: word.id,
+                id: foundWord.id,
             };
     };
 
