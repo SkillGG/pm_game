@@ -1,11 +1,5 @@
 import { EventEmitter } from "events";
-import {
-    AnswersArray,
-    ExcludeSubType,
-    PlayerPointsForCategory,
-    timeToMs,
-    varDump,
-} from "./utils";
+import { AnswersArray, PlayerPointsForCategory, timeToMs } from "./utils";
 import { Gamemode, GameModeList } from "./gamemode";
 import {
     EventTimerOptions,
@@ -23,7 +17,6 @@ import {
 } from "./roomevents";
 
 import { GameStateData, RoomState } from "./utils";
-import { inspect } from "util";
 
 export class Room {
     private static _ID = 0;
@@ -124,7 +117,7 @@ export class Room {
                 type: UpdateDataType.ROUND_END,
                 endRoundData: {
                     points: [...this.playersPoints],
-                    answers: [...this.playersAnswers]
+                    answers: [...this.playersAnswers],
                 },
             } as RoundEndUpdate,
         } as UpdateEvent);

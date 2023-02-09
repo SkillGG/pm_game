@@ -1,5 +1,7 @@
 import { timeToMs } from "./utils";
 
+import catFile from "./categories.json";
+
 export type GamemodeCategory = {
     name: string;
     id: number;
@@ -21,9 +23,7 @@ const aToZ_en_split = split(aToZ_en);
 const azExcept = (az: string, s: string | string[]): string[] =>
     split(az).filter((l) => !s.includes(l));
 
-const CategoryNames: Pick<GamemodeCategory, "id" | "name">[] = await import(
-    "./categories.json"
-);
+const CategoryNames: Pick<GamemodeCategory, "id" | "name">[] = catFile;
 
 const CustomCategoryStartingLetters: {
     id: number;

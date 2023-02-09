@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "back":"nodemon ./saveToFile/index.ts",
+    "front": "vite",
+    "start":"conc \"npm:front\" \"npm:back\"",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
