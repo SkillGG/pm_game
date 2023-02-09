@@ -2,7 +2,7 @@ import React, { FunctionComponent, useEffect, useRef } from "react";
 import { WordType } from "../App";
 
 interface HistoryProps {
-    data: { lastEditID: number; words: WordType[] };
+    data: { lastFileWordIndex: number; words: WordType[] };
     categories: { name: string; id: number }[];
 }
 
@@ -18,12 +18,24 @@ const History: FunctionComponent<HistoryProps> = ({ data, categories }) => {
 
     return (
         <div ref={hisRef} id="history">
-            {data.words.map((word) => {
-                return (
-                    word.id >= 0 && (
+            {data.words
+                .filter((w) => w.id >= 0)
+                .map((word, i) => {
+                    const wordCategories = word.categories;
+                    if (wordCategories) {
+                        if (
+                            wordCategories.length !==
+                            [...new Set(wordCategories)].length
+                        ) {
+                            word.categories = [...new Set(wordCategories)];
+                        }
+                    }
+                    return (
                         <React.Fragment key={word.id}>
                             <div className="historyRecord" data-id={word.id}>
-                                <span className="historyWordID">{word.id}</span>
+                                <span className="historyWordID">
+                                    {i}/{word.id}
+                                </span>
                                 <span className="historyWordName">
                                     {word.word}
                                 </span>
@@ -46,9 +58,8 @@ const History: FunctionComponent<HistoryProps> = ({ data, categories }) => {
                                 </span>
                             </div>
                         </React.Fragment>
-                    )
-                );
-            })}
+                    );
+                })}
         </div>
     );
 };

@@ -124,3 +124,24 @@ body {
 .historyWordID {
     color: black;
 }
+
+.reason-error-already-a-word::after {
+    content: "Already a word " attr(data-word);
+    color: red;
+    text-align: center;
+    display: block;
+}
+
+#edit-wiki-badge {
+    color: green;
+    margin-inline: 25px;
+    font-weight: bolder;
+    float: left;
+    animation: blinker 2s infinite ease-in;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0%;
+    }
+}

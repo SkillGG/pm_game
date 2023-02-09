@@ -38,11 +38,11 @@
             "mammal"
         ]
     },
-    { "name": "Thing", "id": 6 },
-    { "name": "Noun", "id": 7, "keywords": ["noun"] },
-    { "name": "Verb", "id": 8, "keywords": ["verb"] },
-    { "name": "Adverb", "id": 9, "keywords": ["adverb"] },
-    { "name": "Adjective", "id": 10, "keywords": ["adjective"] },
+    { "name": "Object", "id": 6 },
+    { "name": "Noun", "id": 7, "keywords": ["!noun"] },
+    { "name": "Verb", "id": 8, "keywords": ["!verb"] },
+    { "name": "Adverb", "id": 9, "keywords": ["!adverb"] },
+    { "name": "Adjective", "id": 10, "keywords": ["!adjective"] },
     { "name": "River", "id": 11, "keywords": ["river"] },
     {
         "name": "Food",
@@ -51,7 +51,6 @@
             "food",
             "meal",
             "bread",
-            "cooking",
             "drink",
             "feed",
             "meat",
@@ -64,6 +63,7 @@
     {
         "name": "Occupation",
         "id": 15,
-        "keywords": ["one who"]
-    }
+        "keywords": ["one who", "person who"]
+    },
+    { "name": "Artist / Group", "id": 16 }
 ]

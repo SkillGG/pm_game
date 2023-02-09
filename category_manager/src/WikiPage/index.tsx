@@ -1,4 +1,4 @@
-import { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 
 interface WikiPageProps {
     word: string;
@@ -7,6 +7,12 @@ interface WikiPageProps {
     getFromHistory(
         name: string
     ): { categoryNumbers: number[]; id: number } | null;
+    setNetworkError(e: string | null): void;
+    setCategoryReasons: React.Dispatch<
+        React.SetStateAction<[number, string][] | null>
+    >;
+    networkError: string | null;
+    editMode: boolean;
 }
 
 type WikiData = {
@@ -26,7 +32,11 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
     word,
     setCategory,
     categories,
+    setNetworkError,
+    setCategoryReasons,
+    networkError,
     getFromHistory,
+    editMode,
 }) => {
     const [wikiData, setWikiData] = useState<WikiData | undefined>();
 
@@ -40,6 +50,20 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
 
     const [abortController, setAbortController] =
         useState<AbortController | null>(null);
+
+    const addReason = (cat: number, reason: string) => {
+        setCategoryReasons((prev) => {
+            const r: [number, string] = [cat, reason];
+            if (prev) {
+                if (!prev.find((c) => c[0] === cat && c[1] === reason))
+                    return [...prev, r];
+                else return prev;
+            } else return [r];
+        });
+    };
+
+    const getRegexForKeyword = (word: string) =>
+        new RegExp(`.*?\\b${word}\\b(?:.*)?\\n?`, "i");
 
     const cleanupWiki = (div: HTMLElement) => {
         const sections = div.querySelectorAll("[data-mw-section-id]");
@@ -78,12 +102,24 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
             ...querySelectorRemove("[id^='Anagrams']"),
             ...querySelectorRemove("[id^='See_also']"),
             ...querySelectorRemove("[id^='References']"),
+            ...querySelectorRemove("[id^='Statistics']"),
             ...querySelectorRemove(".citation-whole", 2),
             ...querySelectorRemove(".thumbinner", 1),
             ...querySelectorRemove(".noprint", false),
             ...querySelectorRemove(".mw-empty-elt", false),
             ...querySelectorRemove("figure", false),
+            ...querySelectorRemove("ul", false),
         ];
+        div.querySelectorAll("a").forEach((a) => {
+            if (a.getAttribute("href")?.startsWith("./")) {
+                a.href =
+                    a
+                        .getAttribute("href")
+                        ?.replace(/\.\//, "https://en.wiktionary.org/wiki/") ||
+                    a.href;
+                a.target = "__blank";
+            }
+        });
         toRemove.forEach((el) => {
             if (el) {
                 el.remove();
@@ -96,20 +132,36 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
             );
             if (searchCat) {
                 setCategory(searchCat.id);
+                addReason(searchCat.id, "Found element with ID " + r?.id);
             }
+        });
+        categories.forEach((cat) => {
+            cat.keywords
+                ?.filter((word) => word.charAt(0) === "!")
+                .forEach((keyword) => {
+                    const wordRegex = getRegexForKeyword(keyword);
+                    const regexResult = wordRegex.exec(div.innerText);
+                    if (regexResult) {
+                        setCategory(cat.id);
+                        addReason(cat.id, regexResult[0]);
+                    }
+                });
         });
         // Elongated form of
         // Alternative form of
         // Alternative spelling of
         // Synonym of
         const ofRegex =
-            /(?:plural|form|spelling|synonym)\s*of\s*(.*?)\.?\s*$/im;
+            /(?:plural|form|spelling|synonym|participle|simple|continuous)\s*of\s*([a-\xff ]*).*$/im;
         const findOf = ofRegex.exec(div.innerText);
         if (findOf) {
             setShowPrevious((p) => () => {
-                const data = getFromHistory(findOf[1]);
+                const data = getFromHistory(findOf[1].trim());
                 if (data && data.categoryNumbers.length > 0) {
-                    data.categoryNumbers.forEach((c) => setCategory(c));
+                    data.categoryNumbers.forEach((c) => {
+                        setCategory(c);
+                        addReason(c, `From ${findOf[1].trim()}`);
+                    });
                     const div = document.querySelector(
                         `[data-id="${data.id}"]`
                     ) as HTMLDivElement;
@@ -127,16 +179,15 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
     };
 
     useEffect(() => {
+        setWikiData({ __html: "Loading", __full_html: "Loading" });
         setShowPrevious(undefined);
         if (abortController) {
             abortController.abort();
             setAbortController(null);
         }
-
         const controller = new AbortController();
         const signal = controller.signal;
         setAbortController(controller);
-        setWikiData({ __html: "Loading", __full_html: "Loading" });
         const fn = async () => {
             const ACCESSTOKEN = import.meta.env.VITE_ACCESS_TOKEN;
             if (ACCESSTOKEN) {
@@ -150,46 +201,67 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
                     },
                     signal: signal,
                 }).catch((r) => {
-                    console.log(r);
+                    console.error(r.name);
+                    if (r.name !== "AbortError")
+                        setNetworkError("networkerror");
                     return null;
                 });
                 if (response && response.status < 300) {
                     const site = (await response.json()) as WikiGetData;
-                    console.log(site);
                     let dummyHTMLContainer = document.createElement("div");
                     dummyHTMLContainer.innerHTML = site.html;
+                    dummyHTMLContainer
+                        .querySelectorAll(".citation-whole")
+                        .forEach((cite) => cite.remove());
                     categories.forEach((cat) => {
                         if (cat.keywords) {
-                            cat.keywords.forEach((keyword) => {
-                                if (
-                                    new RegExp(`\\b${keyword}\\b`, "i").exec(
+                            cat.keywords
+                                .filter((word) => word.charAt(0) !== "!")
+                                .forEach((keyword) => {
+                                    const keywordRegex =
+                                        getRegexForKeyword(keyword);
+                                    const regexResult = keywordRegex.exec(
                                         dummyHTMLContainer.innerText
-                                    )
-                                ) {
-                                    setCategory(cat.id);
-                                }
-                            });
+                                    );
+                                    if (regexResult) {
+                                        console.log(
+                                            keyword,
+                                            " => ",
+                                            cat.name,
+                                            "\n",
+                                            regexResult[0]
+                                        );
+                                        setCategory(cat.id);
+                                        addReason(cat.id, regexResult[0]);
+                                    }
+                                });
                         }
                     });
+                    const seealso =
+                        dummyHTMLContainer.querySelector(".disambig-see-also");
                     const type =
                         dummyHTMLContainer.querySelector(
                             "[id^='English']"
                         )?.parentElement;
-
                     if (type) {
+                        type.innerHTML =
+                            (type?.innerHTML || "") +
+                            "<hr>" +
+                            (seealso?.innerHTML || "");
                         cleanupWiki(type);
                         setUseCompatView(true);
                     } else {
                         setUseCompatView(false);
                     }
-                    const outHTML =
-                        type?.innerHTML.replace(
-                            /<a rel="mw:WikiLink" href="\.\/(.*)"/g,
-                            `<a rel="mw:WikiLink" href="https://en.wiktionary.org/wiki/$1" target="_blank"`
-                        ) || "";
+                    const site_taregt_as = document.createElement("div");
+                    site_taregt_as.innerHTML = site.html;
+                    site_taregt_as
+                        .querySelectorAll("a")
+                        .forEach((n) => (n.target = "__blank"));
+                    const outHTML = type?.innerHTML || "";
                     setWikiData({
                         __html: outHTML,
-                        __full_html: site.html,
+                        __full_html: site_taregt_as.innerHTML,
                     });
                 } else {
                     setWikiData(undefined);
@@ -210,15 +282,17 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
     return (
         <>
             <div id="wiki">
+                {editMode && <span id="edit-wiki-badge">Editing</span>}
                 <button className="switchview" onClick={toggleCompat}>
                     {useCompatView ? "Full" : "Compact"}
                 </button>
                 {showPrevious && (
                     <button
                         className="switchview"
+                        id="backfind-btn"
                         onClick={() => showPrevious()}
                     >
-                        Backfind
+                        Backfind (z)
                     </button>
                 )}
                 <button
@@ -246,7 +320,16 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
                 <div id="wikicontent">
                     <h1>{word}</h1>
                     {!wikiData ? (
-                        <h2>No wiktionary entry for this word!</h2>
+                        <>
+                            {networkError ? (
+                                <h2>
+                                    There was an error fetching wiktionary site!{" "}
+                                    <button>Retry</button>
+                                </h2>
+                            ) : (
+                                <h2>No wiktionary entry for this word!</h2>
+                            )}
+                        </>
                     ) : (
                         <div
                             dangerouslySetInnerHTML={
