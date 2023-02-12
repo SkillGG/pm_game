@@ -67,7 +67,7 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
         new RegExp(`.*?\\b${word}\\b(?:.*)?\\n?`, "i");
 
     const cleanupWiki = (div: HTMLElement) => {
-        const sections = div.querySelectorAll("[data-mw-section-id]");
+        div.querySelectorAll("a").forEach((n) => (n.target = "__blank"));
         const querySelectorRemove = (
             str: string,
             parent: boolean | number = true
@@ -102,11 +102,14 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
             ...querySelectorRemove("[id^='Antonyms']"),
             ...querySelectorRemove("[id^='Anagrams']"),
             ...querySelectorRemove("[id^='See_also']"),
+            ...querySelectorRemove("[id^='Coordinate_terms']"),
             ...querySelectorRemove("[id^='References']"),
             ...querySelectorRemove("[id^='Statistics']"),
+            ...querySelectorRemove("table", false),
             ...querySelectorRemove(".citation-whole", 2),
             ...querySelectorRemove(".thumbinner", 1),
             ...querySelectorRemove(".noprint", false),
+            ...querySelectorRemove("link", false),
             ...querySelectorRemove(".mw-empty-elt", false),
             ...querySelectorRemove("figure", false),
             ...querySelectorRemove("ul", false),
@@ -251,7 +254,7 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
                     if (type) {
                         type.innerHTML =
                             (type?.innerHTML || "") +
-                            "<hr>" +
+                            "<hr>\n" +
                             (seealso?.innerHTML || "");
                         cleanupWiki(type);
                         setUseCompatView(true);
@@ -286,43 +289,42 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
 
     return (
         <>
-            <div id="wiki">
+            <div id="wiki" role="document">
                 {editMode && <span id="edit-wiki-badge">Editing</span>}
-                <button className="switchview" onClick={toggleCompat}>
-                    {useCompatView ? "Full" : "Compact"}
-                </button>
-                {showPrevious && (
-                    <button
-                        className="switchview"
-                        id="backfind-btn"
-                        onClick={() => showPrevious()}
-                    >
-                        Backfind (z)
+                <div className="switchview">
+                    <button onClick={toggleCompat}>
+                        {useCompatView ? "Full" : "Compact"}
                     </button>
-                )}
-                <button
-                    className="switchview"
-                    onClick={() => {
-                        window.open(
-                            `https://google.com/search?q=wiktionary+${word}`,
-                            "_blank"
-                        );
-                    }}
-                >
-                    Google
-                </button>{" "}
-                <button
-                    className="switchview"
-                    onClick={() => {
-                        window.open(
-                            `https://duckduckgo.com/?q=wiktionary+${word}`,
-                            "_blank"
-                        );
-                    }}
-                >
-                    Duckduck
-                </button>
-                <div id="wikicontent">
+                    {showPrevious ? (
+                        <button
+                            id="backfind-btn"
+                            onClick={() => showPrevious()}
+                        >
+                            Backfind (z)
+                        </button>
+                    ) : null}
+                    <button
+                        onClick={() => {
+                            window.open(
+                                `https://google.com/search?q=wiktionary+${word}`,
+                                "_blank"
+                            );
+                        }}
+                    >
+                        Google
+                    </button>
+                    <button
+                        onClick={() => {
+                            window.open(
+                                `https://duckduckgo.com/?q=wiktionary+${word}`,
+                                "_blank"
+                            );
+                        }}
+                    >
+                        Duckduck
+                    </button>
+                </div>
+                <div id="wikicontent" data-compact={useCompatView}>
                     <h1>{word}</h1>
                     {!wikiData ? (
                         <>

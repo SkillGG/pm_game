@@ -43,6 +43,21 @@ function App() {
 
     const [editMode, setEditMode] = useState(false);
 
+    const [[focusedCol, focusedRow], setButtonFocus] = useState<
+        [number | null, number | null]
+    >([null, null]);
+
+    const focusButton = (col: number | null, row: number | null) => {
+        if (!row || !col) return;
+        if (row < 0 || col < 0) return;
+        const elem = document.querySelector<HTMLElement>(
+            `[data-col='${col}'][data-row='${row}']`
+        );
+        if (elem) {
+            elem.focus();
+        } else focusButton(col, row - 1);
+    };
+
     useEffect(() => {
         let newWordFn: () => void;
 
@@ -58,6 +73,7 @@ function App() {
         }
 
         window.onkeydown = (e: KeyboardEvent) => {
+            // console.log("Key pressed down:", e.code);
             switch (e.code) {
                 case "KeyQ":
                     newWordFn();
@@ -71,6 +87,9 @@ function App() {
                 case "KeyD":
                     drop();
                     break;
+                case "KeyW":
+                    if (backTrack > 0) reject();
+                    break;
                 case "KeyZ":
                     const btn = document.querySelector(
                         "#backfind-btn"
@@ -80,9 +99,28 @@ function App() {
                 case "KeyF":
                     back();
                     break;
+                case "KeyC":
+                    (
+                        document.querySelector("#pickerform")?.children[0]
+                            ?.children[0]
+                            ?.nextElementSibling as HTMLLabelElement
+                    ).focus?.();
+                    break;
+                case "ArrowUp":
+                    focusButton(focusedCol, focusedRow ? focusedRow - 1 : null);
+                    break;
+                case "ArrowDown":
+                    focusButton(focusedCol, focusedRow ? focusedRow + 1 : null);
+                    break;
+                case "ArrowLeft":
+                    focusButton(focusedCol ? focusedCol - 1 : null, focusedRow);
+                    break;
+                case "ArrowRight":
+                    focusButton(focusedCol ? focusedCol + 1 : null, focusedRow);
+                    break;
             }
         };
-    }, [newWord]);
+    }, [newWord, chosenCats, backTrack, word, focusedCol, focusedRow]);
 
     const toggleCat = (catID: number) => {
         if (chosenCats.includes(catID)) {
@@ -109,7 +147,7 @@ function App() {
             isAlready.status = status;
             if (categories) isAlready.categories = categories;
             console.log("Editing word", isAlready);
-        } else {
+        } else if (!(status === "finished" && categories?.length === 0)) {
             const nextId = getNextId();
             const wordObject = {
                 id: nextId,
@@ -132,32 +170,27 @@ function App() {
 
     const addNewWord = (promptWord = "") => {
         const nWord = prompt("New word", promptWord)?.trim();
-        if (nWord) {
-            if (
-                Words.includes(nWord)
-                // ENData.words.find((f) => f.word === nWord)
-            ) {
-                console.error(nWord + " is already a word");
-                const reasonTable = document.querySelector(
-                    "#reason-table"
-                ) as HTMLFormElement | null;
-                if (reasonTable) {
-                    reasonTable.classList.add("reason-error-already-a-word");
-                    reasonTable.dataset.word = nWord;
-                    setTimeout(() => {
-                        reasonTable.classList.remove(
-                            "reason-error-already-a-word"
-                        );
-                    }, 2000);
-                }
-            } else {
-                setCategoryReasons([]);
-                setChosenCats([]);
-                setNewWord(true);
-                setWord(nWord);
+        if (!nWord) return console.error("User canceled");
+        if (
+            Words.includes(nWord)
+            // ENData.words.find((f) => f.word === nWord)
+        ) {
+            console.error(nWord + " is already a word");
+            const reasonTable = document.querySelector(
+                "#reason-table"
+            ) as HTMLFormElement | null;
+            if (reasonTable) {
+                reasonTable.classList.add("reason-error-already-a-word");
+                reasonTable.dataset.word = nWord;
+                setTimeout(() => {
+                    reasonTable.classList.remove("reason-error-already-a-word");
+                }, 2000);
             }
         } else {
-            console.error("User canceled");
+            setCategoryReasons([]);
+            setChosenCats([]);
+            setNewWord(true);
+            setWord(nWord);
         }
         setBackTrack(0);
     };
@@ -166,29 +199,50 @@ function App() {
         setCategoryReasons([]);
         setChosenCats([]);
         setNewWord(false);
+        setBackTrack(0);
         setWord(Words[ENData.lastFileWordIndex]);
     };
 
     const skip = () => {
         addWord("skipped");
         setCategoryReasons(null);
+        setBackTrack(0);
     };
 
     const drop = () => {
         addWord("dropped");
         setCategoryReasons(null);
+        setBackTrack(0);
     };
 
+    useEffect(() => {
+        if (!backTrack) return;
+        const wrd = ENData.words.find((w) => w.id === backTrack);
+        if (wrd) setWord(wrd.word);
+    }, [backTrack]);
+
     const back = () => {
-        setBackTrack(backTrack + 1);
+        setBackTrack((p) => {
+            console.log(
+                ENData.words,
+                ENData.words.length,
+                ENData.words[ENData.words.length]
+            );
+            if (!p) return ENData.words[ENData.words.length - 1].id;
+            else return p - 1;
+        });
         setChosenCats([]);
-        setWord(Words[ENData.lastFileWordIndex - (backTrack + 1)]);
         setCategoryReasons(null);
     };
 
     const apply = () => {
         addWord("finished", chosenCats);
+        setBackTrack(0);
         setCategoryReasons(null);
+    };
+
+    const onButtonFocus = (col: number | null, row: number | null) => {
+        setButtonFocus([col, row]);
     };
 
     useEffect(() => {
@@ -242,7 +296,7 @@ function App() {
     return (
         <>
             {word ? (
-                <div id="page">
+                <div id="page" aria-disabled={true}>
                     <WikiPage
                         setCategoryReasons={setCategoryReasons}
                         networkError={networkError}
@@ -257,6 +311,8 @@ function App() {
                     />
                     <CategoryPicker
                         editMode={editMode}
+                        backState={backTrack}
+                        forward={reject}
                         categoryReasons={categoryReasons}
                         word={word}
                         back={back}
@@ -266,7 +322,10 @@ function App() {
                         apply={apply}
                         skip={skip}
                         drop={drop}
-                        addWord={addNewWord}
+                        addWord={() => {
+                            addNewWord(window.getSelection()?.toString() || "");
+                        }}
+                        onButtonFocus={onButtonFocus}
                         newWord={newWord}
                         reject={reject}
                     />

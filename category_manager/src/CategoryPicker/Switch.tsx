@@ -6,6 +6,9 @@ interface SwitchProps {
     label: string;
     chosen: boolean;
     toggleCat(cID: number): void;
+    gridRow: number;
+    gridCol: number;
+    onButtonFocus(col: number, row: number): void;
 }
 
 const Switch: FunctionComponent<SwitchProps> = ({
@@ -13,7 +16,10 @@ const Switch: FunctionComponent<SwitchProps> = ({
     id,
     prefix,
     chosen,
-    toggleCat
+    toggleCat,
+    gridRow,
+    gridCol,
+    onButtonFocus,
 }) => {
     return (
         <>
@@ -29,6 +35,14 @@ const Switch: FunctionComponent<SwitchProps> = ({
             <label
                 htmlFor={`${prefix}_${id}`}
                 className={`category-switch switch-${chosen ? "on" : "off"}`}
+                tabIndex={0}
+                data-row={gridRow}
+                data-col={gridCol}
+                role="button"
+                onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") toggleCat(id);
+                }}
+                onFocus={() => onButtonFocus(gridCol, gridRow)}
             >
                 {label}
             </label>

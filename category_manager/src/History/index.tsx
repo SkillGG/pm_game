@@ -40,21 +40,23 @@ const History: FunctionComponent<HistoryProps> = ({ data, categories }) => {
                                     {word.word}
                                 </span>
                                 <span className="historyWordCategories">
-                                    {word.categories?.map((cat) => {
-                                        const category = categories?.find(
-                                            (c) => c.id == cat
-                                        );
-                                        if (category)
-                                            return (
-                                                <span
-                                                    key={category.id}
-                                                    className="historyWordCategory"
-                                                >
-                                                    {category.name}
-                                                </span>
-                                            );
-                                        else return null;
-                                    }) || word.status}
+                                    {word.status === "finished"
+                                        ? word.categories?.map((cat) => {
+                                              const category = categories?.find(
+                                                  (c) => c.id == cat
+                                              );
+                                              if (category)
+                                                  return (
+                                                      <span
+                                                          key={category.id}
+                                                          className="historyWordCategory"
+                                                      >
+                                                          {category.name}
+                                                      </span>
+                                                  );
+                                              else return null;
+                                          })
+                                        : word.status}
                                 </span>
                             </div>
                         </React.Fragment>
