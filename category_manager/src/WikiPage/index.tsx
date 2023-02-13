@@ -14,6 +14,8 @@ interface WikiPageProps {
     >;
     networkError: string | null;
     editMode: boolean;
+    editFocused(): void;
+    activeElement: Element | null;
 }
 
 type WikiData = {
@@ -38,6 +40,8 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
     networkError,
     getFromHistory,
     editMode,
+    editFocused,
+    activeElement,
 }) => {
     const [wikiData, setWikiData] = useState<WikiData | undefined>();
 
@@ -210,6 +214,7 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
                     signal: signal,
                 }).catch((r) => {
                     console.error(r.name);
+                    setUseCompatView(true);
                     if (r.name !== "AbortError")
                         setNetworkError("networkerror");
                     return null;
@@ -273,6 +278,7 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
                     });
                 } else {
                     setWikiData(undefined);
+                    setUseCompatView(true);
                 }
             } else {
                 console.error("No accesstoken!", ACCESSTOKEN);
@@ -292,8 +298,8 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
             <div id="wiki" role="document">
                 {editMode && <span id="edit-wiki-badge">Editing</span>}
                 <div className="switchview">
-                    <button onClick={toggleCompat}>
-                        {useCompatView ? "Full" : "Compact"}
+                    <button id="wiki-show-full" onClick={toggleCompat}>
+                        {useCompatView ? "Full" : "Compact"} (x)
                     </button>
                     {showPrevious ? (
                         <button
@@ -303,7 +309,12 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
                             Backfind (z)
                         </button>
                     ) : null}
+                    {document.activeElement &&
+                    document.activeElement.nodeName === "A" ? (
+                        <button onClick={editFocused}>Edit (e)</button>
+                    ) : null}
                     <button
+                        id="search-google"
                         onClick={() => {
                             window.open(
                                 `https://google.com/search?q=wiktionary+${word}`,
@@ -311,9 +322,10 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
                             );
                         }}
                     >
-                        Google
+                        Google (g)
                     </button>
                     <button
+                        id="search-duckduck"
                         onClick={() => {
                             window.open(
                                 `https://duckduckgo.com/?q=wiktionary+${word}`,
@@ -321,7 +333,7 @@ const WikiPage: FunctionComponent<WikiPageProps> = ({
                             );
                         }}
                     >
-                        Duckduck
+                        Duckduck (r)
                     </button>
                 </div>
                 <div id="wikicontent" data-compact={useCompatView}>

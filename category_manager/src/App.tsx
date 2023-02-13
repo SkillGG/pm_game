@@ -25,9 +25,18 @@ const ENData: {
 } = en_data as any;
 
 function App() {
-    const [word, setWord] = useState(
-        Words[ENData.lastFileWordIndex] || undefined
-    );
+
+    /**
+     * @returns txt_words.json index of the earliest non-added word
+     */
+    const getNewestWordIndex = () => {
+        const index = Words.findIndex(
+            (w) => !ENData.words.find((end) => end.word === w)
+        );
+        return index;
+    };
+
+    const [word, setWord] = useState(Words[getNewestWordIndex()] || undefined);
 
     const [backTrack, setBackTrack] = useState(0);
 
@@ -47,6 +56,16 @@ function App() {
         [number | null, number | null]
     >([null, null]);
 
+    const [activeElementState, setActiveElementState] = useState(
+        document.activeElement
+    );
+
+    /**
+     * This function puts focus on the category button
+     * @param col column of the button to focus
+     * @param row row of the button to focus
+     * @returns
+     */
     const focusButton = (col: number | null, row: number | null) => {
         if (!row || !col) return;
         if (row < 0 || col < 0) return;
@@ -58,19 +77,102 @@ function App() {
         } else focusButton(col, row - 1);
     };
 
-    useEffect(() => {
-        let newWordFn: () => void;
+    /**
+     * Change buttonFocus when given button got focused
+     * @param col column of the button
+     * @param row row of the button
+     */
+    const onButtonFocus = (col: number | null, row: number | null) => {
+        setButtonFocus([col, row]);
+    };
 
-        if (!newWord) {
-            newWordFn = () => {
-                const selectedWord = window.getSelection()?.toString() || "";
-                addNewWord(selectedWord.trim());
-            };
-        } else {
-            newWordFn = () => {
-                reject();
-            };
+    /**
+     * It clicks the button with given selector if the button is present in the DOM
+     * @param selector CSS selector of the button
+     * @returns undefined
+     */
+    const clickButtonWithSelector = (selector: string) =>
+        document.querySelector<HTMLButtonElement>(`${selector}`)?.click();
+
+        /**
+         * Return active element's innerText
+         * @returns innerText of the activeElement if it's an anchor
+         */
+    const getActiveWordText = () => {
+        if (document.activeElement && document.activeElement.nodeName === "A")
+            return (document.activeElement as HTMLAnchorElement).innerText;
+    };
+
+    /**
+     * Loads the number into current window (wiki + editmode)
+     * @param newWord word to load
+     * @param bt backTrack number
+     */
+    const loadWord = (newWord: string, bt: number) => {
+        setWord(newWord);
+        setChosenCats([]);
+        setCategoryReasons([]);
+        setBackTrack(bt);
+    };
+
+    /**
+     * Enter edit word with given word
+     * @param w word to edit
+     */
+    const editWord = (w: string) => {
+        if (ENData.words.find((x) => x.word === w)) {
+            loadWord(w, -1);
         }
+    };
+
+    /**
+     * Enter edit mode with currently focused word
+     */
+    const editFocusedWord = () => {
+        if (document.activeElement && document.activeElement.nodeName === "A")
+            editWord((document.activeElement as HTMLAnchorElement).innerText);
+    };
+
+    /**
+     * setChosenCats + setCategoryReasons shorthand
+     * @param catID category ID to switch
+     * @param reason reason for given category
+     */
+    const chooseCategoryWithReason = (catID: number, reason: string) => {
+        const reasonArr: [number, string] = [catID, reason];
+        setChosenCats((p) => [...p, catID]);
+        setCategoryReasons((p) => (p ? [...p, reasonArr] : [reasonArr]));
+    };
+
+    /**
+     * Copy categories from given word
+     * @param copyWord word to copy categories from
+     */
+    const copyCategoriesFromWord = (copyWord: string) => {
+        const copyData = getFromHistory(copyWord);
+        if (copyWord && copyData && copyData.status === "finished")
+            copyData.categoryNumbers?.forEach((cat) =>
+                chooseCategoryWithReason(cat, `Copied from ${copyWord}`)
+            );
+    };
+
+    /**
+     * Update the window.onkeyydown and window.onkeyup listeners when state/active element changes 
+     */
+    useEffect(() => {
+        let newWordFn: () => void = () => {};
+        if (!newWord) {
+            newWordFn = () =>
+                addNewWord(
+                    window.getSelection()?.toString() || getActiveWordText()
+                );
+        } else {
+            newWordFn = () => reject();
+        }
+
+        window.onkeyup = (e) => {
+            setActiveElementState(document.activeElement);
+        };
 
         window.onkeydown = (e: KeyboardEvent) => {
             // console.log("Key pressed down:", e.code);
@@ -84,44 +186,73 @@ function App() {
                 case "KeyS":
                     skip();
                     break;
+                case "KeyE":
+                    editFocusedWord();
+                    break;
                 case "KeyD":
                     drop();
                     break;
                 case "KeyW":
-                    if (backTrack > 0) reject();
+                    if (backTrack !== 0) reject();
                     break;
                 case "KeyZ":
-                    const btn = document.querySelector(
-                        "#backfind-btn"
-                    ) as HTMLButtonElement | null;
-                    btn?.click();
+                    clickButtonWithSelector("#backfind-btn");
+                    break;
+                case "KeyG":
+                    clickButtonWithSelector("#search-google");
+                    break;
+                case "KeyR":
+                    clickButtonWithSelector("#search-duckduck");
                     break;
                 case "KeyF":
                     back();
                     break;
                 case "KeyC":
-                    (
-                        document.querySelector("#pickerform")?.children[0]
-                            ?.children[0]
-                            ?.nextElementSibling as HTMLLabelElement
-                    ).focus?.();
+                    if (!e.ctrlKey) focusButton(1, 1);
+                    else {
+                        const fW = getActiveWordText();
+                        if (fW) copyCategoriesFromWord(fW);
+                    }
+                    break;
+                case "KeyX":
+                    clickButtonWithSelector("#wiki-show-full");
                     break;
                 case "ArrowUp":
-                    focusButton(focusedCol, focusedRow ? focusedRow - 1 : null);
+                    if (!e.shiftKey)
+                        focusButton(
+                            focusedCol,
+                            focusedRow ? focusedRow - 1 : null
+                        );
                     break;
                 case "ArrowDown":
-                    focusButton(focusedCol, focusedRow ? focusedRow + 1 : null);
+                    if (!e.shiftKey)
+                        focusButton(
+                            focusedCol,
+                            focusedRow ? focusedRow + 1 : null
+                        );
                     break;
                 case "ArrowLeft":
-                    focusButton(focusedCol ? focusedCol - 1 : null, focusedRow);
+                    if (!e.shiftKey)
+                        focusButton(
+                            focusedCol ? focusedCol - 1 : null,
+                            focusedRow
+                        );
                     break;
                 case "ArrowRight":
-                    focusButton(focusedCol ? focusedCol + 1 : null, focusedRow);
+                    if (!e.shiftKey)
+                        focusButton(
+                            focusedCol ? focusedCol + 1 : null,
+                            focusedRow
+                        );
                     break;
             }
         };
     }, [newWord, chosenCats, backTrack, word, focusedCol, focusedRow]);
 
+    /**
+     * Toggle state of the category
+     * @param catID category to toggle
+     */
     const toggleCat = (catID: number) => {
         if (chosenCats.includes(catID)) {
             setChosenCats((p) => p.filter((f) => f !== catID));
@@ -130,6 +261,9 @@ function App() {
         }
     };
 
+    /**
+     * Send data to api to save to file
+     */
     const saveToFile = () => {
         fetch("http://localhost:9090/save", {
             method: "POST",
@@ -137,10 +271,18 @@ function App() {
         });
     };
 
+    /**
+     * Return a free id in the {ENData.words} list  
+     * @returns id of the last added word
+     */
     const getNextId = () => ENData.words[ENData.words.length - 1]?.id + 1;
 
+    /**
+     * Add a new word to ENData.words
+     * @param status status of the word
+     * @param categories categories to add to a word
+     */
     const addWord = (status: WordStatus, categories?: number[]) => {
-        console.log("Adding categories:", categories, "to word", word);
         const catSet = [...new Set(categories)];
         const isAlready = ENData.words.find((w) => w.word === word);
         if (isAlready) {
@@ -158,22 +300,22 @@ function App() {
             console.log("Adding word", wordObject);
             ENData.words.push(wordObject);
         }
-        setNewWord(false);
-        setChosenCats([]);
-        const index = Words.findIndex(
-            (w) => !ENData.words.find((end) => end.word === w)
-        );
-        ENData.lastFileWordIndex = index;
+        ENData.lastFileWordIndex = getNewestWordIndex();
         saveToFile();
-        setWord(Words[ENData.lastFileWordIndex]);
+        setNewWord(false);
+        loadWord(Words[ENData.lastFileWordIndex], 0);
     };
 
+    /**
+     * Add new word outside of the txt_words.json file
+     * @param promptWord default prompt value
+     */
     const addNewWord = (promptWord = "") => {
         const nWord = prompt("New word", promptWord)?.trim();
         if (!nWord) return console.error("User canceled");
         if (
-            Words.includes(nWord)
-            // ENData.words.find((f) => f.word === nWord)
+            Words.includes(nWord) ||
+            ENData.words.find((f) => f.word === nWord)
         ) {
             console.error(nWord + " is already a word");
             const reasonTable = document.querySelector(
@@ -187,47 +329,48 @@ function App() {
                 }, 2000);
             }
         } else {
-            setCategoryReasons([]);
-            setChosenCats([]);
+            loadWord(nWord, 0);
             setNewWord(true);
-            setWord(nWord);
         }
-        setBackTrack(0);
     };
 
+    /**
+     * reject new word addition / backtrack state / edit mode
+     */
     const reject = () => {
-        setCategoryReasons([]);
-        setChosenCats([]);
+        if (editMode) ENData.lastFileWordIndex = getNewestWordIndex();
+        loadWord(Words[ENData.lastFileWordIndex], 0);
         setNewWord(false);
-        setBackTrack(0);
-        setWord(Words[ENData.lastFileWordIndex]);
     };
 
+    /**
+     * Set status to skipped
+     */
     const skip = () => {
         addWord("skipped");
-        setCategoryReasons(null);
-        setBackTrack(0);
     };
 
+    /**
+     * Set status to dropped
+     */
     const drop = () => {
         addWord("dropped");
-        setCategoryReasons(null);
-        setBackTrack(0);
     };
 
+    /**
+     * Go back when backtrack changes
+     */
     useEffect(() => {
         if (!backTrack) return;
         const wrd = ENData.words.find((w) => w.id === backTrack);
         if (wrd) setWord(wrd.word);
     }, [backTrack]);
 
+    /**
+     * Go back to previous words from ENData.words
+     */
     const back = () => {
         setBackTrack((p) => {
-            console.log(
-                ENData.words,
-                ENData.words.length,
-                ENData.words[ENData.words.length]
-            );
             if (!p) return ENData.words[ENData.words.length - 1].id;
             else return p - 1;
         });
@@ -235,14 +378,11 @@ function App() {
         setCategoryReasons(null);
     };
 
+    /**
+     * Save categories for given word
+     */
     const apply = () => {
         addWord("finished", chosenCats);
-        setBackTrack(0);
-        setCategoryReasons(null);
-    };
-
-    const onButtonFocus = (col: number | null, row: number | null) => {
-        setButtonFocus([col, row]);
     };
 
     useEffect(() => {
@@ -256,20 +396,23 @@ function App() {
                 return p ? [...p, reason] : [reason];
             });
             if (wordInDatabase.categoryNumbers) {
-                setChosenCats(wordInDatabase.categoryNumbers);
-                setCategoryReasons((p) => {
-                    if (wordInDatabase.categoryNumbers) {
-                        const reasons: [number, string][] =
-                            wordInDatabase.categoryNumbers.map((cat) => {
-                                return [cat, "Editing"];
-                            });
-                        return p ? [...p, ...reasons] : [...reasons];
-                    } else return p;
+                wordInDatabase.categoryNumbers.forEach((catId) => {
+                    chooseCategoryWithReason(catId, `From database ${word}`);
                 });
             }
         }
+        focusButton(1, 1);
     }, [word]);
 
+    useEffect(() => {
+        focusButton(1, 1);
+    }, []);
+
+    /**
+     * Get information about the word from ENData.word 
+     * @param s word to search in history
+     * @returns a status and categories of the word from ENData.words
+     */
     const getFromHistory = (
         s: string
     ): {
@@ -306,13 +449,14 @@ function App() {
                             if (!chosenCats.includes(cat)) toggleCat(cat);
                         }}
                         categories={Categories}
+                        editFocused={editFocusedWord}
                         word={word}
                         editMode={editMode}
+                        activeElement={activeElementState}
                     />
                     <CategoryPicker
                         editMode={editMode}
                         backState={backTrack}
-                        forward={reject}
                         categoryReasons={categoryReasons}
                         word={word}
                         back={back}
@@ -327,6 +471,7 @@ function App() {
                         }}
                         onButtonFocus={onButtonFocus}
                         newWord={newWord}
+                        forward={reject}
                         reject={reject}
                     />
                     <History categories={Categories} data={ENData} />

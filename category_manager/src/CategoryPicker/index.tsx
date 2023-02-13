@@ -83,10 +83,12 @@ const CategoryPicker: React.FC<CategoryPickerProps> = ({
                 <button id="drop-btn" onClick={drop}>
                     Drop (d)
                 </button>
-                <button id="back-btn" onClick={back}>
-                    Back (f)
-                </button>
-                {backState > 0 ? (
+                {backState >= 0 ? (
+                    <button id="back-btn" onClick={back}>
+                        Back (f)
+                    </button>
+                ) : null}
+                {backState !== 0 ? (
                     <button id="forward-btn" onClick={forward}>
                         Forward (w)
                     </button>
