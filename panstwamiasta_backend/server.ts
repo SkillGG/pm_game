@@ -87,7 +87,7 @@ export function Route<T>(method: "get" | "post") {
       console.log("Fired Path", path);
       setHeaders(res);
       fn.bind(target)(req, res);
-      if (!res.sent) res.status(200).send("OK");
+      if (!res.sent) res.status(404).send("OK");
     });
   };
 }
